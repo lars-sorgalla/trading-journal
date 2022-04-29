@@ -1,7 +1,7 @@
 from pyspark.sql import SparkSession, DataFrame
 from pyspark.sql.types import StructType, StructField, StringType, DecimalType
 import extract_gsheets as gs
-import load_postgres
+import connect_postgres
 import src.config.schema as s
 import pyspark.sql.functions as F
 from pyspark.sql.types import IntegerType, TimestampType
@@ -172,12 +172,19 @@ def main() -> None:
     # ============================
     # LOAD
     # ============================
+
     # target 1
-    load_postgres.write_to_postgres(df_target_dtypes)
+    connect_postgres.write_to_postgres(df_target_dtypes)
+
     # target 2
     # needed as source for tableau public
     # converted to Pandas, as native Spark 'DataFrame.write.csv()' method creates weird name for csv (part-0000...)
     df_target_dtypes.toPandas().to_csv("../../data-out/trading_journal.csv", sep=";", decimal=".", index=False)
+
+    # target 3
+    # needed as source for tableau public
+    # gets data from trading journal view and saves in csv
+
 
     # ============================
     # TESTS
