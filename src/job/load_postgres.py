@@ -28,8 +28,9 @@ def _connect() -> pyodbc.Connection:
 def get_data() -> None:
     connection = _connect()
     cursor = connection.cursor()
-    cursor.execute("select * from staging.trading_journal order by 1")
-    for row in cursor.fetchall():
+    cursor.execute("select * from ods.trading_journal_view order by 1")
+    table_data = cursor.fetchall()
+    for row in table_data:
         print(row)
 
 
