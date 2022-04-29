@@ -177,7 +177,7 @@ def main() -> None:
     # target 2
     # needed as source for tableau public
     # converted to Pandas, as native Spark 'DataFrame.write.csv()' method creates weird name for csv (part-0000...)
-    df_target_dtypes.toPandas().to_csv("../data-out/trading_journal.csv", sep=";", decimal=".", index=False)
+    df_target_dtypes.toPandas().to_csv("/data-out/trading_journal.csv", sep=";", decimal=".", index=False)
 
     # ============================
     # TESTS
