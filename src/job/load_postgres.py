@@ -1,7 +1,7 @@
 import pyodbc
 from configparser import ConfigParser
 from pyspark.sql import DataFrame
-from config import credentials
+from src.config import credentials
 
 
 def _connect() -> pyodbc.Connection:

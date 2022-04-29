@@ -2,11 +2,10 @@ from pyspark.sql import SparkSession, DataFrame
 from pyspark.sql.types import StructType, StructField, StringType, DecimalType
 import extract_gsheets as gs
 import load_postgres
-import config.schema as s
+import src.config.schema as s
 import pyspark.sql.functions as F
 from pyspark.sql.types import IntegerType, TimestampType
 from datetime import datetime, timedelta
-from pandas import DataFrame as pdf
 
 APP_NAME = "gsheets-trading-journal-to-postgres"
 EPOCH = "1899-12-30"  # epoch start date in Google Sheets
