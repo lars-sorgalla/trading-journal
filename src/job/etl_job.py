@@ -184,7 +184,7 @@ def main() -> None:
     # target 3
     # needed as source for tableau public
     # gets data from trading journal view and saves in csv
-
+    connect_postgres.load_pg_view_to_csv()
 
     # ============================
     # TESTS
