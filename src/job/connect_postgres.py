@@ -41,6 +41,7 @@ def write_to_postgres(df: DataFrame) -> None:
     pg_password: str = credentials.postgres_login["password"]
 
     (df.write
+     # driver is needed for subsequent jdbc method
      .option("driver", "org.postgresql.Driver")
      # if "truncate" not set, table would be dropped instead. Attached views hinders this. Solution would be to
      # DROP ... CASCADE, which is not supported using JDBC option in Spark
