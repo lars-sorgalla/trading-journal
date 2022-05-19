@@ -19,3 +19,9 @@ cd /src/job/
 python3 etl_job.py
 ```
 
+# 3. Metrics Definitions
+- win rate
+  - Description / Usage: A ratio to measure trading success
+  - Calculation: `trades won / trades total`
+  - `trades won` = every closed trade whose profit > 0 (when = 0, it's considered a losing trade)
+  - `trades total` = amount of all closed trades since inception of the trading account
