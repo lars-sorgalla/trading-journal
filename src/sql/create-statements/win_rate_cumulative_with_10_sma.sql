@@ -2,6 +2,7 @@
 
 CTE calculates winning and total trades. These attributes are referenced in the subsequent SELECT query to calculate the 10 day moving average of the win rate
 */
+CREATE VIEW ods.v_win_rate_cumulative AS 
 WITH cte_trades_won_and_totals AS
 	(
 	SELECT
