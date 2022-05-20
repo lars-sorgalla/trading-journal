@@ -27,7 +27,7 @@ def start_spark(app_name: str) -> SparkSession:
     # TODO: Enable Spark UI. Settings not correct yet, as UI closes after application finished
     spark: SparkSession = (SparkSession
                            .builder
-                           .config("spark.jars", "../lib/postgresql-42.3.3.jar")
+                           .config("spark.jars", "src/lib/postgresql-42.3.3.jar")
                            .config("spark.eventLog.enabled", "true")
                            .config("spark.eventLog.dir", "file:/Users/Kim/Documents/spark/history-server-logs")
                            .config("spark.history.fs.logDirectory",
