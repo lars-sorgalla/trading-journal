@@ -1,14 +1,16 @@
-import sys
+import sys  # TODO: remove both lines, as they were for debugging purposes
 print(f"{sys.path=}")
+
+from datetime import datetime, timedelta
 
 from pyspark.sql import SparkSession, DataFrame
 from pyspark.sql.types import StructType, StructField, StringType, DecimalType
+
 import src.job.extract_gsheets as gs
 import src.job.connect_postgres
 import src.config.schema as s
 import pyspark.sql.functions as F
-from pyspark.sql.types import IntegerType, TimestampType
-from datetime import datetime, timedelta
+
 
 APP_NAME = "gsheets-trading-journal-to-postgres"
 EPOCH = "1899-12-30"  # epoch start date in Google Sheets
