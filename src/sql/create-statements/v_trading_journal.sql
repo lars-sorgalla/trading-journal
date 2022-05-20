@@ -1,75 +1,107 @@
---
--- PostgreSQL database dump
---
+-- drop view before reloading db then create view after load
+-- DROP VIEW ods.trading_journal_view
 
--- Dumped from database version 14.1
--- Dumped by pg_dump version 14.2
-
-SET statement_timeout = 0;
-SET lock_timeout = 0;
-SET idle_in_transaction_session_timeout = 0;
-SET client_encoding = 'UTF8';
-SET standard_conforming_strings = on;
-SELECT pg_catalog.set_config('search_path', '', false);
-SET check_function_bodies = false;
-SET xmloption = content;
-SET client_min_messages = warning;
-SET row_security = off;
-
---
--- Name: trading_journal_view; Type: VIEW; Schema: ods; Owner: postgres
---
-
-CREATE VIEW ods.trading_journal_view AS
- SELECT trading_journal.trade_id,
-    trading_journal.ticker,
-        CASE trading_journal.sell_datetime
-            WHEN '1970-01-01 00:00:00'::timestamp without time zone THEN true
-            ELSE false
-        END AS position_open,
-    trading_journal.share_amount,
-    round(((trading_journal.share_amount)::double precision * trading_journal.entry_price)) AS purchase_price_total,
-    trading_journal.entry_date,
-    trading_journal.entry_price,
-    trading_journal.initial_stop_loss,
-    round((((trading_journal.entry_price)::numeric - (trading_journal.initial_stop_loss)::numeric) / (trading_journal.initial_stop_loss)::numeric), 3) AS stop_loss_distance,
-    trading_journal.adr_percent,
-    round(((((trading_journal.entry_price)::numeric - (trading_journal.initial_stop_loss)::numeric) / (trading_journal.initial_stop_loss)::numeric) / (trading_journal.adr_percent)::numeric), 2) AS sl_dist_adr_ratio,
-    trading_journal.market_cap,
-        CASE
-            WHEN (trading_journal.market_cap < (0.3)::double precision) THEN 'Micro Cap'::text
-            WHEN (trading_journal.market_cap < (2)::double precision) THEN 'Small Cap'::text
-            WHEN (trading_journal.market_cap < (10)::double precision) THEN 'Mid Cap'::text
-            WHEN (trading_journal.market_cap < (200)::double precision) THEN 'Large Cap'::text
-            WHEN (trading_journal.market_cap >= (200)::double precision) THEN 'Mega Cap'::text
-            ELSE NULL::text
-        END AS cap_group,
-    trading_journal.portfolio_risk,
-    COALESCE(trading_journal.sell_shares_price_1, (0)::double precision) AS sell_shares_price_1,
-    COALESCE(trading_journal.sell_shares_amount_1, (0)::bigint) AS sell_shares_amount_1,
-    trading_journal.sell_shares_date_1,
-    round(COALESCE(((trading_journal.sell_shares_price_1 - trading_journal.entry_price) * (trading_journal.sell_shares_amount_1)::double precision), (0)::double precision)) AS partial_profit_1,
-    COALESCE(trading_journal.sell_shares_price_2, (0)::double precision) AS sell_shares_price_2,
-    COALESCE(trading_journal.sell_shares_amount_2, (0)::bigint) AS sell_shares_amount_2,
-    trading_journal.sell_shares_date_2,
-    round(COALESCE(((trading_journal.sell_shares_price_2 - trading_journal.entry_price) * (trading_journal.sell_shares_amount_2)::double precision), (0)::double precision)) AS partial_profit_2,
-    COALESCE(trading_journal.sell_shares_price_3, (0)::double precision) AS sell_shares_price_3,
-    COALESCE(trading_journal.sell_shares_amount_3, (0)::bigint) AS sell_shares_amount_3,
-    trading_journal.sell_shares_date_3,
-    round(COALESCE(((trading_journal.sell_shares_price_3 - trading_journal.entry_price) * (trading_journal.sell_shares_amount_3)::double precision), (0)::double precision)) AS partial_profit_3,
-    round((((trading_journal.entry_price)::numeric - (trading_journal.initial_stop_loss)::numeric) * (trading_journal.share_amount)::numeric), 0) AS money_at_risk,
-    round((((round((COALESCE(((trading_journal.sell_shares_price_1)::numeric - (trading_journal.entry_price)::numeric), (0)::numeric) * COALESCE((trading_journal.sell_shares_amount_1)::numeric, (0)::numeric))) + round((COALESCE(((trading_journal.sell_shares_price_2)::numeric - (trading_journal.entry_price)::numeric), (0)::numeric) * COALESCE((trading_journal.sell_shares_amount_2)::numeric, (0)::numeric)))) + round((COALESCE(((trading_journal.sell_shares_price_3)::numeric - (trading_journal.entry_price)::numeric), (0)::numeric) * COALESCE((trading_journal.sell_shares_amount_3)::numeric, (0)::numeric)))) / round((((trading_journal.entry_price)::numeric - (trading_journal.initial_stop_loss)::numeric) * (trading_journal.share_amount)::numeric), 0)), 2) AS risk_reward_ratio,
-    ((round((COALESCE((trading_journal.sell_shares_price_1 - trading_journal.entry_price), (0)::double precision) * (COALESCE(trading_journal.sell_shares_amount_1, (0)::bigint))::double precision)) + round((COALESCE((trading_journal.sell_shares_price_2 - trading_journal.entry_price), (0)::double precision) * (COALESCE(trading_journal.sell_shares_amount_2, (0)::bigint))::double precision))) + round((COALESCE((trading_journal.sell_shares_price_3 - trading_journal.entry_price), (0)::double precision) * (COALESCE(trading_journal.sell_shares_amount_3, (0)::bigint))::double precision))) AS profit_total,
-    trading_journal.trello_trade_review,
-    trading_journal.setup_rating,
-    trading_journal.setup_chart,
-    trading_journal.sell_datetime
-   FROM ods.trading_journal;
-
-
-ALTER TABLE ods.trading_journal_view OWNER TO postgres;
-
---
--- PostgreSQL database dump complete
---
+CREATE OR REPLACE VIEW ods.trading_journal_view AS WITH cte_cp_cols AS (
+	SELECT
+		-- METADATA
+		trade_id,
+		ticker, 
+		round(share_amount * entry_price) AS purchase_price_total,
+		entry_date ::date AS entry_date,
+		ROUND((entry_price::numeric - initial_stop_loss::numeric) / initial_stop_loss::numeric, 3) AS stop_loss_distance,
+		-- this is the default date, when nothing was entered
+		CASE sell_datetime
+		WHEN '1970-01-01 00:00:00' THEN
+			TRUE
+		ELSE
+			FALSE
+		END AS position_open,
+		
+		-- TRADE DETAILS
+		share_amount,
+		entry_price,
+		initial_stop_loss,
+		adr_percent,
+		ROUND((entry_price::numeric - initial_stop_loss::numeric) / initial_stop_loss::numeric / adr_percent::numeric, 2) AS sl_dist_adr_ratio,
+		market_cap,
+		CASE WHEN market_cap < 0.3 THEN
+			'Micro Cap'
+		WHEN market_cap < 2 THEN
+			'Small Cap'
+		WHEN market_cap < 10 THEN
+			'Mid Cap'
+		WHEN market_cap < 200 THEN
+			'Large Cap'
+		WHEN market_cap >= 200 THEN
+			'Mega Cap'
+		END AS cap_group,
+		portfolio_risk,
+		
+		-- PARTIAL SELL 1
+		coalesce(sell_shares_price_1, 0) AS sell_shares_price_1,
+		coalesce(sell_shares_amount_1, 0) AS sell_shares_amount_1,
+		sell_shares_date_1,
+		round(coalesce((sell_shares_price_1 - entry_price) * sell_shares_amount_1, 0)) AS partial_profit_1,
+		
+		-- PARTIAL SELL 2
+		coalesce(sell_shares_price_2, 0) AS sell_shares_price_2,
+		coalesce(sell_shares_amount_2, 0) AS sell_shares_amount_2,
+		sell_shares_date_2,
+		round(coalesce((sell_shares_price_2 - entry_price) * sell_shares_amount_2, 0)) AS partial_profit_2,
+		
+		-- PARTIAL SELL 3
+		coalesce(sell_shares_price_3, 0) AS sell_shares_price_3,
+		coalesce(sell_shares_amount_3, 0) AS sell_shares_amount_3,
+		sell_shares_date_3,
+		round(coalesce((sell_shares_price_3 - entry_price) * sell_shares_amount_3, 0)) AS partial_profit_3,
+		
+		-- TOTALS
+		ROUND((entry_price::numeric - initial_stop_loss::numeric) * share_amount, 0) AS money_at_risk,
+		
+		-- MISCELLANEOUS
+		trello_trade_review,
+		setup_rating,
+		setup_chart,
+		sell_datetime
+	FROM
+		trading_journal
+)
+SELECT
+	trade_id,
+	ticker,
+	position_open,
+	share_amount,
+	purchase_price_total,
+	entry_date,
+	entry_price,
+	initial_stop_loss,
+	stop_loss_distance,
+	adr_percent,
+	sl_dist_adr_ratio,
+	market_cap,
+	cap_group,
+	portfolio_risk,
+	sell_shares_price_1,
+	sell_shares_amount_1,
+	sell_shares_date_1,
+	partial_profit_1,
+	sell_shares_price_2,
+	sell_shares_amount_2,
+	sell_shares_date_2,
+	partial_profit_2,
+	sell_shares_price_3,
+	sell_shares_amount_3,
+	sell_shares_date_3,
+	partial_profit_3,
+	money_at_risk,
+	-- formula for risk-reward-ratio: profit_total / money_at_risk
+	(partial_profit_1::NUMERIC + partial_profit_2::NUMERIC + partial_profit_3::NUMERIC) / money_at_risk::NUMERIC AS risk_reward_ratio,
+	partial_profit_1 + partial_profit_2 + partial_profit_3 AS profit_total,
+	trello_trade_review,
+	setup_rating,
+	setup_chart,
+	sell_datetime
+	
+FROM
+	cte_cp_cols;
 
