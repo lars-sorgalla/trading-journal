@@ -1,7 +1,10 @@
+import sys
+print(f"{sys.path=}")
+
 from pyspark.sql import SparkSession, DataFrame
 from pyspark.sql.types import StructType, StructField, StringType, DecimalType
-import extract_gsheets as gs
-import connect_postgres
+import src.job.extract_gsheets as gs
+import src.job.connect_postgres
 import src.config.schema as s
 import pyspark.sql.functions as F
 from pyspark.sql.types import IntegerType, TimestampType
