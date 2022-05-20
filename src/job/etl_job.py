@@ -1,6 +1,3 @@
-import sys  # TODO: remove both lines, as they were for debugging purposes
-print(f"{sys.path=}")
-
 from datetime import datetime, timedelta
 
 from pyspark.sql import SparkSession, DataFrame
