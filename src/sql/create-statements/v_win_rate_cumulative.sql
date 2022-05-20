@@ -1,6 +1,8 @@
 /* SMA10 For Win Rate 
 
-CTE calculates winning and total trades. These attributes are referenced in the subsequent SELECT query to calculate the 10 day moving average of the win rate
+CTE calculates winning and total trades. These attributes are referenced in the subsequent SELECT query to calculate the 10 day moving average of the win rate.
+
+NOTE: When removing 'WHERE row_num_in_window = 1' the 10 SMA does not average on days anymore but on single trades, thus having a higher granularity.
 */
 CREATE VIEW ods.v_win_rate_cumulative AS 
 WITH cte_trades_won_and_totals AS
