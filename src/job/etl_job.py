@@ -4,10 +4,10 @@ print(f"{sys.path=}")
 from datetime import datetime, timedelta
 
 from pyspark.sql import SparkSession, DataFrame
-from pyspark.sql.types import StructType, StructField, StringType, DecimalType
+from pyspark.sql.types import StructType, StructField, StringType, DecimalType, IntegerType, TimestampType
 
 import src.job.extract_gsheets as gs
-import src.job.connect_postgres
+import src.job.connect_postgres as cpg
 import src.config.schema as s
 import pyspark.sql.functions as F
 
@@ -179,7 +179,7 @@ def main() -> None:
     # ============================
 
     # target 1
-    connect_postgres.write_to_postgres(df_target_dtypes)
+    cpg.write_to_postgres(df_target_dtypes)
 
     # target 2
     # needed as source for tableau public
@@ -189,7 +189,7 @@ def main() -> None:
     # target 3
     # needed as source for tableau public
     # gets data from trading journal view and saves in csv
-    connect_postgres.load_pg_view_to_csv()
+    cpg.load_pg_view_to_csv()
 
     # ============================
     # TESTS
