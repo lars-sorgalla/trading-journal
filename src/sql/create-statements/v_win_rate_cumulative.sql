@@ -13,7 +13,7 @@ WITH cte_trades_won_and_totals AS
 		, COUNT(trade_id) OVER(ORDER BY sell_shares_date_3) AS trades_total
 		, ROW_NUMBER() OVER(PARTITION BY sell_shares_date_3 ORDER BY sell_datetime DESC) AS row_num_in_window
 	FROM 
-		trading_journal_view
+		v_trading_journal
 	WHERE 
 		1 = 1
 		AND position_open = FALSE

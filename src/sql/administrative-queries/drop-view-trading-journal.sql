@@ -1,1 +1,1 @@
-DROP VIEW ods.trading_journal_view;
+DROP VIEW ods.v_trading_journal;

@@ -1,2 +1,2 @@
 select *
-from ods.trading_journal_view
+from ods.v_trading_journal;

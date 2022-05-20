@@ -1,7 +1,7 @@
 -- drop view before reloading db then create view after load
--- DROP VIEW ods.trading_journal_view
+-- DROP VIEW ods.v_trading_journal
 
-CREATE OR REPLACE VIEW ods.trading_journal_view AS WITH cte_cp_cols AS (
+CREATE OR REPLACE VIEW ods.v_trading_journal AS WITH cte_cp_cols AS (
 	SELECT
 		-- METADATA
 		trade_id,
