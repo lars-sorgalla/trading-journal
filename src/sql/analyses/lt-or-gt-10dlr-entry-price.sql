@@ -6,7 +6,7 @@ select
 	count(*) as count_trades,
 	sum(profit_total) as sum_profits_in_dollar,
 	round(avg(risk_reward_ratio), 2) as avg_risk_reward_ratio
-from ods.trading_journal_view
+from ods.v_trading_journal
 group by stock_price_group;
 
 
