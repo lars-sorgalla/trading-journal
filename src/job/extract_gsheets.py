@@ -2,7 +2,7 @@ from google.oauth2 import service_account
 from googleapiclient.discovery import build, Resource
 from typing import Optional, Any
 
-SERVICE_ACCOUNT_FILE = "../config/gsheets_api_keys.json"
+SERVICE_ACCOUNT_FILE = "src/config/gsheets_api_keys.json"
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
 SPREADSHEET_ID = "1M5SY1fZENzqp8h4JwmJVzWrXsSp0bk4V1UoZAyuLn04"
 
