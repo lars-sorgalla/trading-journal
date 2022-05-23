@@ -1,0 +1,7 @@
+*.pyi
+**/__pycache__
+data-out/*
+.idea
+.venv
+credentials.py
+gsheets_api_keys.json
