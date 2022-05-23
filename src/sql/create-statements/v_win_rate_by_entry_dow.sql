@@ -3,7 +3,7 @@
 */
 
 -- calculate day of week number
-CREATE VIEW ods.v_win_rate_by_entry_dow AS
+CREATE OR REPLACE VIEW ods.v_win_rate_by_entry_dow AS
 WITH 
 cte_day_of_week_num AS 
 	(
