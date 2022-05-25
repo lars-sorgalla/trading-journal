@@ -29,8 +29,8 @@ def _connect() -> pyodbc.Connection:
 def load_pg_view_to_csv() -> None:
     connection = _connect()
     cursor = connection.cursor()
-    rows = cursor.execute("select * from ods.trading_journal_view order by 1")
-    with open("data-out/trading_journal_view.csv", mode="w", newline="") as f:
+    rows = cursor.execute("select * from ods.v_trading_journal order by 1")
+    with open("data-out/v_trading_journal_view", mode="w", newline="") as f:
         writer = csv.writer(f, delimiter=";")
         writer.writerow([elem[0] for elem in cursor.description])
         writer.writerows(rows)

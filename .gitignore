@@ -5,3 +5,4 @@ data-out/*
 .venv
 credentials.py
 gsheets_api_keys.json
+trading-journal-spark.sublime-workspace
