@@ -1,8 +1,11 @@
-import pyodbc
-from configparser import ConfigParser
-from pyspark.sql import DataFrame
-from src.config import credentials
 import csv
+from configparser import ConfigParser
+
+from prefect import task
+import pyodbc
+from pyspark.sql import DataFrame
+
+from src.config import credentials
 
 
 def _connect() -> pyodbc.Connection:
@@ -26,16 +29,18 @@ def _connect() -> pyodbc.Connection:
     return connection
 
 
-def load_pg_view_to_csv() -> None:
+@task
+def load_pg_view_to_csv(path: str) -> None:
     connection = _connect()
     cursor = connection.cursor()
     rows = cursor.execute("select * from ods.v_trading_journal order by 1")
-    with open("data-out/v_trading_journal.csv", mode="w", newline="") as f:
+    with open(path, mode="w", newline="") as f:
         writer = csv.writer(f, delimiter=";")
         writer.writerow([elem[0] for elem in cursor.description])
         writer.writerows(rows)
 
 
+@task
 def write_to_postgres(df: DataFrame) -> None:
     pg_user: str = credentials.postgres_login["username"]
     pg_password: str = credentials.postgres_login["password"]

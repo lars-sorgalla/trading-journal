@@ -1,6 +1,9 @@
+from typing import Optional, Any
+
+from prefect import task
 from google.oauth2 import service_account
 from googleapiclient.discovery import build, Resource
-from typing import Optional, Any
+
 
 SERVICE_ACCOUNT_FILE = "src/config/gsheets_api_keys.json"
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
@@ -28,6 +31,7 @@ def _get_resource(creds: Any) -> Resource:
     return sheet
 
 
+@task
 def get_sheet_data() -> dict:
     """Call Google sheets API and extract data
 

@@ -1,5 +1,7 @@
 from datetime import datetime, timedelta
 
+from prefect import task, Flow
+import prefect.engine.state as st
 from pyspark.sql import SparkSession, DataFrame
 from pyspark.sql.types import StructType, StructField, StringType, DecimalType, IntegerType, TimestampType
 
@@ -39,6 +41,7 @@ def start_spark(app_name: str) -> SparkSession:
     return spark
 
 
+@task
 def create_df_from_src(source_data: dict, spark: SparkSession) -> DataFrame:
     """transformation to retrieve source table from google sheet
 
@@ -91,6 +94,7 @@ def create_df_from_src(source_data: dict, spark: SparkSession) -> DataFrame:
     return df
 
 
+@task
 def drop_unneeded_cols(df: DataFrame) -> DataFrame:
     """Removes columns from source dataframe when they start with an _
 
@@ -100,6 +104,7 @@ def drop_unneeded_cols(df: DataFrame) -> DataFrame:
     return df.drop('_2', '_5', '_9', '_11', '_13', '_17', '_21', '_25', '_27', '_28', '_29', '_30', '_34')
 
 
+@task
 def change_data_types(df: DataFrame) -> DataFrame:
     """Take initial dataframe and change data types into target Postgres format
 
@@ -155,49 +160,60 @@ def change_data_types(df: DataFrame) -> DataFrame:
     return df
 
 
+@task
+def write_to_csv(df: DataFrame, path: str) -> None:
+    df.toPandas().to_csv(path, sep=";", decimal=".", index=False)
+
+
+@task
+def run_tests(df1: DataFrame, df2: DataFrame, df3: DataFrame) -> None:
+    df1.select(s.TICKER, s.ENTRY_DATE, s.SELL_SHARES_DATE_3, s.SELL_DATETIME).show(3, truncate=False)
+    df2.select(s.TICKER, s.ENTRY_DATE, s.SELL_SHARES_DATE_3, s.SELL_DATETIME).show(3, truncate=False)
+    df3.select(s.TICKER, s.ENTRY_DATE, s.SELL_SHARES_DATE_3, s.SELL_DATETIME).show(3, truncate=False)
+
+
 def main() -> None:
-    # Spark entry point
-    spark: SparkSession = start_spark(app_name=APP_NAME)
+    with Flow("trading-journal") as flow:
+        # Spark entry point
+        spark: SparkSession = start_spark(app_name=APP_NAME)
 
-    # ============================
-    # EXTRACT
-    # ============================
-    src_data: dict = gs.get_sheet_data()
+        # ============================
+        # EXTRACT
+        # ============================
+        src_data: dict = gs.get_sheet_data()
 
-    # ============================
-    # TRANSFORM
-    # ============================
-    df: DataFrame = create_df_from_src(src_data, spark)
-    df_drop_cols: DataFrame = drop_unneeded_cols(df)
-    df_target_dtypes: DataFrame = change_data_types(df_drop_cols)
+        # ============================
+        # TRANSFORM
+        # ============================
+        source_df: DataFrame = create_df_from_src(src_data, spark)
+        df_drop_cols: DataFrame = drop_unneeded_cols(source_df)
+        df_target_dtypes: DataFrame = change_data_types(df_drop_cols)
 
-    # ============================
-    # LOAD
-    # ============================
+        # ============================
+        # LOAD
+        # ============================
 
-    # target 1
-    cpg.write_to_postgres(df_target_dtypes)
+        # target 1
+        cpg.write_to_postgres(df_target_dtypes)
 
-    # target 2
-    # needed as source for tableau public
-    # converted to Pandas, as native Spark 'DataFrame.write.csv()' method creates weird name for csv (part-0000...)
-    df_target_dtypes.toPandas().to_csv("data-out/trading_journal.csv", sep=";", decimal=".", index=False)
+        # target 2
+        # needed as source for tableau public
+        # converted to Pandas, as native Spark 'DataFrame.write.csv()' method creates weird name for csv (part-0000...)
+        write_to_csv(df_target_dtypes, path="data-out/trading_journal.csv")
 
-    # target 3
-    # needed as source for tableau public
-    # gets data from trading journal view and saves in csv
-    cpg.load_pg_view_to_csv()
+        # target 3
+        # needed as source for tableau public
+        # gets data from trading journal view and saves in csv
+        cpg.load_pg_view_to_csv(path="data-out/v_trading_journal.csv")
 
-    # ============================
-    # TESTS
-    # ============================
-    df.select(s.TICKER, s.ENTRY_DATE, s.SELL_SHARES_DATE_3, s.SELL_DATETIME).show(3, truncate=False)
-    df_drop_cols.select(s.TICKER, s.ENTRY_DATE, s.SELL_SHARES_DATE_3, s.SELL_DATETIME).show(3, truncate=False)
-    df_target_dtypes.select(s.TICKER, s.ENTRY_DATE, s.SELL_SHARES_DATE_3, s.SELL_DATETIME).show(3, truncate=False)
+        # ============================
+        # TESTS
+        # ============================
+        run_tests(source_df, df_drop_cols, df_target_dtypes)
+
+    flow_state: st.State = flow.run()
+    flow.visualize(flow_state=flow_state)
 
 
-# ============================
-# Entry point for PySpark ETL application
-# ============================
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
