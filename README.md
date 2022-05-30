@@ -13,12 +13,19 @@ The entry point to this program is the `main()` function in `etl_job.py`.
 
 # 2. Installing And Executing The Program
 It is recommended to start the application from the command line. Therefore,
-`cd` into the main module directory and execute the application
+`cd` into the root project directory and execute the application using the
+-m option of the python command-line program. The file is provided as a module
+in dot notation.
 
 ```zsh
 cd /src/job/
-python3 etl_job.py
+python3 -m src.job.etl_job
 ```
+
+This actually gave me some headaches. I had the special case, that the main
+script for this project is not placed in the top-level directory. So I needed
+this special syntax. For details see the section on
+[Script Execution](#44-script-execution---my-special-case)
 
 # 3. Metrics Definitions
 - win rate
@@ -83,3 +90,5 @@ code duplication.
 With CTEs this is not an issue anymore. So I constantly use CTEs now. For me
 it's similar to a python function as it allows referencing the code somewhere
 else in the query.
+
+## 4.4. Script Execution - My Special Case
