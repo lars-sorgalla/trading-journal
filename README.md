@@ -92,3 +92,30 @@ it's similar to a python function as it allows referencing the code somewhere
 else in the query.
 
 ## 4.4. Script Execution - My Special Case
+
+The main script for this project is not located in its top-level directory.
+When I wanted to execute it the normal way, I received several `ModuleNotFound`
+errors. This did not work:
+
+```zsh
+# executed in activated virtual environment
+cd trading_journal/src/job/  # go into main script dir
+python etl_job.py
+```
+
+After some investigation and googling I found out that in such cases it is
+necessary to call the main script as a module, instead of as a script. This
+worked:
+
+```zsh
+cd trading_journal  # go into top-level project directory
+python -m src.job.etl_job
+```
+
+I am not sure about the exact details of why this works. But it has to do with
+the **Python Module Search Path**. The directory that contains the called
+script is added to the PYTHONPATH. This environment variable enables the
+interpreter to find modules. The first `python` call shown above would add
+`trading_journal/src/job/` to the search path. In that case the interpreter
+could not find any packages or modules that are in another project sub-directory
+than `src/job/`.
