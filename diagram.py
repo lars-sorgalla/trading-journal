@@ -4,7 +4,7 @@ from diagrams.onprem.analytics import Spark, Tableau
 from diagrams.onprem.database import Postgresql
 
 
-with Diagram("Architecture Of Trading Journal Program",
+with Diagram("Application Architecture",
              show=True, direction="LR"):
     gsheet = Document("Google Sheet")
     spark = Spark("Transformation")
