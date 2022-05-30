@@ -11,6 +11,10 @@ The main programming language is Python.
 
 The entry point to this program is the `main()` function in `etl_job.py`.
 
+The system architecture looks as follows:
+
+![Architecture of Trading Journal](provide-link-here)
+
 # 2. Installing And Executing The Program
 ## 2.1. Execute Main Script
 It is recommended to start the application from the command line. Therefore,
