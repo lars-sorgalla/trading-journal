@@ -2,6 +2,7 @@
 	"folders":
 	[
 		{
+			"follow_symlinks": true,
 			"path": ".",
 		}
 	],
@@ -11,7 +12,11 @@
 			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
 			"name": "Anaconda Python Builder",
 			"selector": "source.python",
-			"shell_cmd": "\"python\" -u \"$file\""
+			"shell_cmd": "\"/Users/Kim/Documents/python-code/pycharm-projects/trading-journal-spark/.venv/bin/python3.9\" -u \"$file\"",
 		}
 	],
+	"settings":
+	{
+		"python_interpreter": "/Users/Kim/Documents/python-code/pycharm-projects/trading-journal-spark/.venv/bin/python3.9",
+	},
 }
