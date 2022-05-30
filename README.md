@@ -12,20 +12,33 @@ The main programming language is Python.
 The entry point to this program is the `main()` function in `etl_job.py`.
 
 # 2. Installing And Executing The Program
+## 2.1. Execute Main Script
 It is recommended to start the application from the command line. Therefore,
 `cd` into the root project directory and execute the application using the
 -m option of the python command-line program. The file is provided as a module
 in dot notation.
 
 ```zsh
+# executed in activated virtual environment
 cd /src/job/
-python3 -m src.job.etl_job
+python -m src.job.etl_job
 ```
 
 This actually gave me some headaches. I had the special case, that the main
 script for this project is not placed in the top-level directory. So I needed
 this special syntax. For details see the section on
 [Script Execution](#44-script-execution---my-special-case)
+
+## 2.2. Update Architecture Diagram
+There is a package installed called `diagrams` which graphically shows the
+architecture. The diagram can be manually updated by calling
+
+```zsh
+# executed in activated virtual environment
+cd trading_journal  # this is the projects' top-level directory
+python diagrams.py
+
+```
 
 # 3. Metrics Definitions
 - win rate
@@ -108,6 +121,7 @@ necessary to call the main script as a module, instead of as a script. This
 worked:
 
 ```zsh
+# executed in activated virtual environment
 cd trading_journal  # go into top-level project directory
 python -m src.job.etl_job
 ```
