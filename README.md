@@ -13,7 +13,7 @@ The entry point to this program is the `main()` function in `etl_job.py`.
 
 The system architecture looks as follows:
 
-![Architecture of Trading Journal](provide-link-here)
+![Architecture of Trading Journal](https://github.com/lars-sorgalla/trading-journal/blob/dev/architecture_of_trading_journal_program.png)
 
 # 2. Installing And Executing The Program
 ## 2.1. Execute Main Script
