@@ -30,11 +30,28 @@ def _connect() -> pyodbc.Connection:
 
 
 @task
-def load_pg_view_to_csv(path: str) -> None:
+def pg_table_to_csv(table: str) -> None:
+    """
+    Retrieve a table/view from Postgres and load into CSV
+
+    Needed for offline BI tools such as the free Tableau Public, which does not
+    support DB connections as a source.
+
+    CSV file is stored in ``[project_root]/data-out/[name_of_table]``
+
+    :param table: name of table or view e.g. 'v_win_rate_cumulative'
+
+    :return: None
+    """
     connection = _connect()
     cursor = connection.cursor()
-    rows = cursor.execute("select * from ods.v_trading_journal order by 1")
-    with open(path, mode="w", newline="") as f:
+
+    # get table/view from database
+    rows = cursor.execute(f"select * from ods.{table} order by 1")
+
+    # write into csv file
+    csv_path: str = f"data-out/{table}.csv"
+    with open(csv_path, mode="w", newline="") as f:
         writer = csv.writer(f, delimiter=";")
         writer.writerow([elem[0] for elem in cursor.description])
         writer.writerows(rows)
@@ -57,4 +74,4 @@ def write_to_postgres(df: DataFrame) -> None:
 
 # for debugging
 if __name__ == '__main__':
-    load_pg_view_to_csv()
+    pg_table_to_csv()

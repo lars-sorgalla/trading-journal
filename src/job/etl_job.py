@@ -248,7 +248,9 @@ def main() -> None:
         # target 3
         # needed as source for tableau public
         # gets data from trading journal view and saves in csv
-        cpg.load_pg_view_to_csv(path="data-out/v_trading_journal.csv")
+        cpg.pg_table_to_csv(table= "v_trading_journal")
+        cpg.pg_table_to_csv(table= "v_return_monthly_by_sell_date")
+        cpg.pg_table_to_csv(table= "v_win_rate_cumulative")
 
         # ============================
         # TESTS
