@@ -4,5 +4,3 @@ CREATE TABLE IF NOT EXISTS stock_sectors (
     , sector TEXT NOT NULL
     , industry TEXT NOT NULL
 );
-
-DROP TABLE stock_sectors
