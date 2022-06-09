@@ -8,7 +8,7 @@ from pyspark.sql import DataFrame
 from src.config import credentials
 
 
-def _connect() -> pyodbc.Connection:
+def connect() -> pyodbc.Connection:
     # read config file
     config_file: str = "/usr/local/etc/odbc.ini"
     config = ConfigParser()
@@ -24,8 +24,12 @@ def _connect() -> pyodbc.Connection:
     password = section["Password"]
 
     # connect to db
-    connection = pyodbc.connect(
-        f"Driver={driver};Server={server};Port={port};Database={database};Uid={user};Pwd={password};")
+    connection = pyodbc.connect(f"Driver={driver};"
+                                 f"Server={server};"
+                                 f"Port={port};"
+                                 f"Database={database};"
+                                 f"Uid={user};"
+                                 f"Pwd={password};")
     return connection
 
 
@@ -43,11 +47,11 @@ def pg_table_to_csv(table: str) -> None:
 
     :return: None
     """
-    connection = _connect()
+    connection = connect()
     cursor = connection.cursor()
 
     # get table/view from database
-    rows = cursor.execute(f"select * from ods.{table} order by 1")
+    rows = cursor.execute(f"SELECT * FROM ods.{table} ORDER BY 1")
 
     # write into csv file
     csv_path: str = f"data-out/{table}.csv"
@@ -65,13 +69,11 @@ def write_to_postgres(df: DataFrame) -> None:
     (df.write
      # driver is needed for subsequent jdbc method
      .option("driver", "org.postgresql.Driver")
-     # if "truncate" not set, table would be dropped instead. Attached views hinders this. Solution would be to
-     # DROP ... CASCADE, which is not supported using JDBC option in Spark
+     # if "truncate" not set, table would be dropped instead. Attached views
+     # hinders this. Solution would be to DROP ... CASCADE, which is not
+     # supported using JDBC option in Spark.
      .option("truncate", "true")
-     .jdbc(url="jdbc:postgresql://localhost:5432/trading", table="ods.trading_journal", mode="overwrite",
+     .jdbc(url="jdbc:postgresql://localhost:5432/trading",
+           table="ods.trading_journal",
+           mode="overwrite",
            properties={"user": pg_user, "password": pg_password}))
-
-
-# for debugging
-if __name__ == '__main__':
-    pg_table_to_csv()
