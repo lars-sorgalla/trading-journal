@@ -248,9 +248,9 @@ def main() -> None:
         # target 3
         # needed as source for tableau public
         # gets data from trading journal view and saves in csv
-        cpg.pg_table_to_csv(table= "v_trading_journal")
-        cpg.pg_table_to_csv(table= "v_return_monthly_by_sell_date")
-        cpg.pg_table_to_csv(table= "v_win_rate_cumulative")
+        cpg.pg_table_to_csv(table= "v_trading_journal", upstream_tasks=[cpg.write_to_postgres])
+        cpg.pg_table_to_csv(table= "v_return_monthly_by_sell_date", upstream_tasks=[cpg.write_to_postgres])
+        cpg.pg_table_to_csv(table= "v_win_rate_cumulative", upstream_tasks=[cpg.write_to_postgres])
 
         # ============================
         # TESTS
